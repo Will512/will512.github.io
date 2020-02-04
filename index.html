@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+table, th, td {
+  border: 1px solid black;
+}
+</style>
+</head>
+<body>
+<p id="test"> Select your county and the type of resources you want and press Run!</p>
+<select id="county">
+<option value="All" selected>All Counties</option>
+<option value="Abbeville">Abbeville</option>
+<option value="Aiken">Aiken</option>
+</select>
+<select id="expertise">
+<option value="All" selected>All Areas</option>
+<option value="Forestry">Forestry</option>
+<option value="Foraging">Foraging</option>
+<option value="Dev">Community Development</option>
+<option value="Water">Water Resources</option>
+</select>
+<button onclick="makeTable()">Run</button>
+<p id="end"> ... </p>
+<script>
+class LandResource{
+constructor(name = "N/A", type, email = "N/A", county, phone = "N/A"){
+this.name = name;
+this.type = type;
+this.email = email;
+this.county = county;
+this.phone = phone;
+}
+}
+function dropfunc(id){
+console.log("dropfunc running")
+var sel = document.getElementById(id);
+for(var i=0,len=sel.options.length;i<len;i++){
+opt = sel.options[i];
+if(opt.selected==true){
+return opt.value;
+}
+}
+}
+function makeTable(){
+console.log("makeTable running")
+var types = ["county","expertise"];
+inputs = types.map(function(id){
+return dropfunc(id)})
+
+var myInfo = getInfo(inputs[0],inputs[1]);
+
+if(document.getElementById('table') != null){
+document.getElementById('table').remove()
+}
+var myDiv = document.createElement('div');
+myDiv.setAttribute('id','table')
+var myTable = document.createElement('table');
+var myTBody = document.createElement('tbody');
+var myTr = document.createElement('tr');
+var myTh1 = document.createElement('th');
+var myTh2 = document.createElement('th');
+var myTh3 = document.createElement('th');
+var myTh4 = document.createElement('th');
+
+nameH = document.createTextNode("Name");
+typeH = document.createTextNode("Type");
+phoneH = document.createTextNode("Phone");
+emailH = document.createTextNode("Email");
+
+myDiv.appendChild(myTable)
+myTable.appendChild(myTBody);
+myTBody.appendChild(myTr);
+myTr.appendChild(myTh1);
+myTr.appendChild(myTh2);
+myTr.appendChild(myTh3);
+myTr.appendChild(myTh4);
+myTh1.appendChild(nameH);
+myTh2.appendChild(typeH);
+myTh3.appendChild(phoneH);
+myTh4.appendChild(emailH);
+
+for(var i=0,len=myInfo.length;i<len;i++){
+
+loopTr = document.createElement("tr");
+loopTd1 = document.createElement("td")
+loopName = document.createTextNode(myInfo[i].name)
+loopTd1.appendChild(loopName)
+loopTr.appendChild(loopTd1)
+
+loopTd2 = document.createElement("td")
+loopType = document.createTextNode(myInfo[i].type)
+loopTd2.appendChild(loopType)
+loopTr.appendChild(loopTd2)
+
+loopTd3 = document.createElement("td")
+loopPhoneSpecial = document.createElement("a")
+callString = "tel:".concat(myInfo[i].phone)
+loopPhoneSpecial.setAttribute('href',callString)
+loopPhone = document.createTextNode(myInfo[i].phone)
+loopPhoneSpecial.appendChild(loopPhone)
+loopTd3.appendChild(loopPhoneSpecial)
+loopTr.appendChild(loopTd3)
+
+loopTd4 = document.createElement("td")
+loopEmailSpecial = document.createElement("a")
+emailString = "mailto:".concat(myInfo[i].email)
+loopEmailSpecial.setAttribute('href',emailString)
+loopEmail = document.createTextNode(myInfo[i].email)
+loopEmailSpecial.appendChild(loopEmail)
+loopTd4.appendChild(loopEmailSpecial)
+loopTr.appendChild(loopTd4)
+
+myTBody.appendChild(loopTr);
+}
+var currentDiv = document.getElementById("end")
+document.body.insertBefore(myDiv, currentDiv); 
+}
+function getInfo(county, expertise){
+console.log("getinfo running")
+console.log(county)
+var counties = ["Abbeville","Aiken"];
+var exptypes = ["Forestry","Foraging","Dev","Water"];
+var StateMap = new Map();
+var AbKey = "Ab";
+var AiKey = "Ai";
+var AbMap = new Map();
+var AbFos = new LandResource("Tom Brant","Forestry","jbrant@clemson.edu","Abbeville","864-465-5030");
+var AbFor = new LandResource("Gary Coleman","Foraging","garyc@clemson.edu","Abbeville","864-223-3264");
+var AbCom = new LandResource("Wilder Ferreira","Community Development","wferrei@clemson.edu","Abbeville","864-642-8758");
+var AbWa = new LandResource("Heather Nix","Water","nix4@clemson.edu","Abbeville","864-359-3383");
+AbMap.set("Forestry",AbFos);
+AbMap.set("Foraging",AbFor);
+AbMap.set("Dev",AbCom);
+AbMap.set("Water",AbWa);
+var AiMap = new Map();
+var AiFos = new LandResource("Stephen Pohlman, Jr.","Forestry","spohlma@clemson.edu","Aiken","803-637-3161");
+var AiFor = new LandResource("Brittany Peacock","Foraging","bepeaco@clemson.edu","Aiken","803-508-7737");
+var AiCom = new LandResource("Aiken", "Community Development");
+var AiWa = new LandResource("Aiken","Water");
+AiMap.set("Forestry",AiFos);
+AiMap.set("Foraging",AiFor);
+AiMap.set("Dev",AiCom);
+AiMap.set("Water",AbWa);
+StateMap.set("Ab",AbMap);
+StateMap.set("Ai",AiMap);
+var myMap = new Map()
+console.log(myMap.size)
+if(county=="Abbeville"){
+console.log("county test successful")
+myMap = StateMap.get("Ab");
+console.log(myMap.size)
+} else if(county=="Aiken"){
+myMap = StateMap.get("Ai");
+} else{
+
+}
+if(expertise=="All"){
+var ret = [];
+for(var j=0,len=exptypes.length;j<len;j++){
+ret.push(myMap.get(exptypes[j]))
+}
+return ret;
+}
+else{
+return [myMap.get(expertise)];
+}
+}
+</script>
+</body>
+</html>
